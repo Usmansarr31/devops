@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des produits</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f3f4f6;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 24px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            color: #111827;
+        }
+
+        header span {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.1fr 1.4fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: #f9fafb;
+            padding: 16px 18px 18px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .card h2 {
+            margin: 0 0 12px;
+            font-size: 1.1rem;
+            color: #111827;
+        }
+
+        .card p {
+            margin: 0 0 12px;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            color: #374151;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 0.95rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        }
+
+        .error {
+            margin-top: 4px;
+            font-size: 0.8rem;
+            color: #b91c1c;
+        }
+
+        button,
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid #d1d5db;
+            color: #374151;
+        }
+
+        .btn-outline-danger {
+            border-color: #f97373;
+            color: #b91c1c;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: #e5e7eb;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+        }
+
+        th {
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #d1d5db;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: #f9fafb;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f3f4f6;
+        }
+
+        tbody tr:hover {
+            background: #e5e7eb;
+        }
+
+        .badge-empty {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .muted {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .actions {
+            display: flex;
+            gap: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <header>
+        <div>
+            <h1>Gestion des produits</h1>
+            <span>Ajoutez, visualisez et gérez vos produits.</span>
+        </div>
+        <div class="muted">
+            Total produits : {{ produits|length }}
+        </div>
+    </header>
+
+    <div class="grid">
+        <!-- Bloc formulaire d’ajout -->
+        <section class="card">
+            <h2>Ajouter un produit</h2>
+            <p>Renseignez le nom et le prix puis cliquez sur <strong>Enregistrer</strong>.</p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    {{ form.nom.label_tag }}
+                    {{ form.nom }}
+                    {% if form.nom.errors %}
+                        <div class="error">{{ form.nom.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.prix.label_tag }}
+                    {{ form.prix }}
+                    {% if form.prix.errors %}
+                        <div class="error">{{ form.prix.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+            </form>
+        </section>
+
+        <!-- Bloc liste -->
+        <section class="card">
+            <h2>Liste des produits</h2>
+
+            {% if produits %}
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nom</th>
+                        <th>Prix (FCFA)</th>
+                        <th>Créé le</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for produit in produits %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ produit.nom }}</td>
+                            <td>{{ produit.prix }}</td>
+                            <td>{{ produit.created_at|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <div class="actions">
+                                    <a href="{% url 'produit_edit' produit.pk %}" class="btn btn-sm btn-outline">
+                                        Modifier
+                                    </a>
+
+                                    <form method="post" action="{% url 'produit_delete' produit.pk %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline btn-outline-danger">
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="muted">
+                    <span class="badge-empty">Aucun produit</span><br>
+                    Ajoutez un premier produit avec le formulaire à gauche.
+                </p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+</body>
+</html>

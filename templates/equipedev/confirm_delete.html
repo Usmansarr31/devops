@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Supprimer le produit</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f3f4f6;
+        }
+        .page {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 24px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        }
+        h1 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 1.4rem;
+            color: #111827;
+        }
+        p {
+            font-size: 0.95rem;
+            color: #374151;
+        }
+        .warning {
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #fef2f2;
+            color: #b91c1c;
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+        .btn-secondary {
+            background: white;
+            border: 1px solid #d1d5db;
+            color: #374151;
+        }
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <h1>Supprimer le produit</h1>
+    <div class="warning">
+        Cette action est définitive. Le produit sera supprimé de la base de données.
+    </div>
+    <p>Produit : <strong>{{ produit.nom }}</strong> ({{ produit.prix }} FCFA)</p>
+
+    <form method="post" class="actions">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Oui, supprimer</button>
+        <a href="{% url 'produit_list' %}" class="btn btn-secondary">Annuler</a>
+    </form>
+</div>
+</body>
+</html>
