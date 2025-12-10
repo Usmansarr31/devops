@@ -1,0 +1,29 @@
+# Django Framework
+Django>=5.0,<6.0
+
+# MySQL Database Connector
+mysqlclient>=2.2.0
+
+# Alternative MySQL connector (décommentez si mysqlclient ne fonctionne pas)
+# PyMySQL>=1.1.0
+
+# Python Decouple - Pour gérer les variables d'environnement
+python-decouple>=3.8
+
+# Pillow - Pour la gestion des images
+Pillow>=10.0.0
+
+# Django REST Framework - Pour créer des APIs (optionnel)
+# djangorestframework>=3.14.0
+
+# Django CORS Headers - Pour gérer CORS (optionnel)
+# django-cors-headers>=4.3.0
+
+# Python dotenv - Alternative pour les variables d'environnement
+# python-dotenv>=1.0.0
+
+# Gunicorn - Serveur WSGI pour la production (optionnel)
+# gunicorn>=21.2.0
+
+# Whitenoise - Pour servir les fichiers statiques en production (optionnel)
+# whitenoise>=6.6.0
