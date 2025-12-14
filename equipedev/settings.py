@@ -80,7 +80,7 @@ DATABASES = {
         'NAME': 'devops_demo',
         'USER': 'root',
         'PASSWORD': 'Mpi2945@',
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
         'Options': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
