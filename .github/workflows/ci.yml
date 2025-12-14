@@ -1,0 +1,159 @@
+name: CI - Test & Build (Django)
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    # Service MySQL pour les tests
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: test_db
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      # -------------------------------------------------------
+      # Étape 1 — Récupération du code du repository
+      # -------------------------------------------------------
+      - name: Checkout du repository
+        uses: actions/checkout@v4
+
+      # -------------------------------------------------------
+      # Étape 2 — Installer Python
+      # -------------------------------------------------------
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"  # Django 5.0 requiert Python 3.10+
+          cache: 'pip'  # Cache pour accélérer les builds
+
+      # -------------------------------------------------------
+      # Étape 3 — Installation des dépendances système pour mysqlclient
+      # -------------------------------------------------------
+      - name: Installer dépendances système MySQL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libmysqlclient-dev pkg-config
+
+      # -------------------------------------------------------
+      # Étape 4 — Installation des dépendances Python
+      # -------------------------------------------------------
+      - name: Installer dépendances Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # -------------------------------------------------------
+      # Étape 5 — Ajouter pytest si absent
+      # -------------------------------------------------------
+      - name: Installer pytest
+        run: |
+          pip install pytest pytest-django
+
+      # -------------------------------------------------------
+      # Étape 6 — Générer configuration Django (.env)
+      # -------------------------------------------------------
+      - name: Créer .env pour les tests
+        run: |
+          echo "DEBUG=True" > .env
+          echo "SECRET_KEY=test-secret-key-for-ci-pipeline" >> .env
+          echo "DB_ENGINE=django.db.backends.mysql" >> .env
+          echo "DB_NAME=test_db" >> .env
+          echo "DB_USER=test_user" >> .env
+          echo "DB_PASSWORD=test_password" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
+          echo "DB_PORT=3306" >> .env
+
+      # -------------------------------------------------------
+      # Étape 7 — Attendre que MySQL soit prêt
+      # -------------------------------------------------------
+      - name: Attendre MySQL
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h "127.0.0.1" -u test_user -ptest_password --silent; then
+              echo "MySQL est prêt!"
+              break
+            fi
+            echo "Attente de MySQL... ($i/30)"
+            sleep 2
+          done
+
+      # -------------------------------------------------------
+      # Étape 8 — Migrations
+      # -------------------------------------------------------
+      - name: Appliquer migrations
+        run: python manage.py migrate --noinput
+
+      # -------------------------------------------------------
+      # Étape 9 — Collecte des fichiers statiques
+      # -------------------------------------------------------
+      - name: Collect static files
+        run: python manage.py collectstatic --noinput
+
+      # -------------------------------------------------------
+      # Étape 10 — Lancer les tests Pytest
+      # -------------------------------------------------------
+      - name: Lancer tests Pytest
+        run: pytest -v --disable-warnings --maxfail=1
+
+      # -------------------------------------------------------
+      # Étape 11 (optionnelle) — Linting Python (Flake8)
+      # -------------------------------------------------------
+      - name: Analyse du code (Flake8)
+        run: |
+          pip install flake8
+          flake8 . --max-line-length=120 --exclude=migrations,venv,env
+        continue-on-error: true
+
+      # -------------------------------------------------------
+      # Étape 12 (optionnelle) — Analyse statique (mypy)
+      # -------------------------------------------------------
+      - name: Analyse statique (mypy)
+        run: |
+          pip install mypy django-stubs
+          mypy . --ignore-missing-imports
+        continue-on-error: true
+
+      # -------------------------------------------------------
+      # Étape 13 (optionnelle) — Build Frontend si présent
+      # -------------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+        continue-on-error: true
+
+      - name: Installer dépendances npm
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          else
+            echo "Pas de frontend — skip npm"
+          fi
+        continue-on-error: true
+
+      - name: Build Frontend
+        run: |
+          if [ -f package.json ]; then
+            npm run build
+          else
+            echo "Pas de build frontend à exécuter"
+          fi
+        continue-on-error: true
