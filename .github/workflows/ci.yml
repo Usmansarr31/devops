@@ -67,19 +67,18 @@ jobs:
           pip install pytest pytest-django
 
       # -------------------------------------------------------
-      # Étape 6 — Générer configuration Django (.env)
+      # Étape 6 — Configuration MySQL via variables d'environnement
       # -------------------------------------------------------
-      - name: Créer .env pour les tests
+      - name: Configurer variables d'environnement MySQL
         run: |
-          echo "DEBUG=True" > .env
-          echo "SECRET_KEY=test-secret-key-for-ci-pipeline" >> .env
-          echo "DB_ENGINE=django.db.backends.mysql" >> .env
-          echo "DB_NAME=test_db" >> .env
-          echo "DB_USER=test_user" >> .env
-          echo "DB_PASSWORD=test_password" >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_OPTIONS={'init_command': \"SET sql_mode='STRICT_TRANS_TABLES'\"}" >> .env
+          echo "DEBUG=True" >> $GITHUB_ENV
+          echo "SECRET_KEY=test-secret-key-for-ci-pipeline" >> $GITHUB_ENV
+          echo "DB_ENGINE=django.db.backends.mysql" >> $GITHUB_ENV
+          echo "DB_NAME=test_db" >> $GITHUB_ENV
+          echo "DB_USER=test_user" >> $GITHUB_ENV
+          echo "DB_PASSWORD=test_password" >> $GITHUB_ENV
+          echo "DB_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "DB_PORT=3306" >> $GITHUB_ENV
 
       # -------------------------------------------------------
       # Étape 7 — Attendre que MySQL soit prêt
